@@ -7,8 +7,15 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.CircleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
+import java.util.Iterator;
 
 import jp.float1251.gwshooting.GWShooting;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
@@ -32,6 +39,15 @@ public class InGameScreen implements Screen {
         this.viewport = new FitViewport(640, 960);
 
         initialize();
+
+        // ééÇµÇ…tmxÇ©ÇÁobjectÇì«Ç›çûÇ›
+        TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
+        MapLayer layer = map.getLayers().get("Enemy");
+        Iterator<MapObject> iter = layer.getObjects().iterator();
+        while (iter.hasNext()) {
+            MapObject obj = iter.next();
+            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", obj.getProperties().get("x"), obj.getProperties().get("y")));
+        }
     }
 
     private void initialize() {
