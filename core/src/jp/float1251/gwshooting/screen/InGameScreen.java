@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.CircleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -19,8 +18,10 @@ import java.util.Iterator;
 
 import jp.float1251.gwshooting.GWShooting;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
+import jp.float1251.gwshooting.system.MovementSystem;
 
 /**
  * Created by takahiroiwatani on 2015/04/30.
@@ -39,20 +40,12 @@ public class InGameScreen implements Screen {
         this.viewport = new FitViewport(640, 960);
 
         initialize();
-
-        // ééÇµÇ…tmxÇ©ÇÁobjectÇì«Ç›çûÇ›
-        TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
-        MapLayer layer = map.getLayers().get("Enemy");
-        Iterator<MapObject> iter = layer.getObjects().iterator();
-        while (iter.hasNext()) {
-            MapObject obj = iter.next();
-            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", obj.getProperties().get("x"), obj.getProperties().get("y")));
-        }
     }
 
     private void initialize() {
         engine = new Engine();
         // add System
+        engine.addSystem(new MovementSystem());
         engine.addSystem(new DebugCollisionRenderingSystem((com.badlogic.gdx.graphics.OrthographicCamera) viewport.getCamera()));
 
         // add Component
@@ -60,15 +53,29 @@ public class InGameScreen implements Screen {
         player.add(new PositionComponent(100, 100));
         player.add(new CircleCollisionComponent(10));
         engine.addEntity(player);
+
+        // ééÇµÇ…tmxÇ©ÇÁobjectÇì«Ç›çûÇ›ÅAìGÇèoåªÇ≥ÇπÇÈ
+        TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
+        MapLayer layer = map.getLayers().get("Enemy");
+        Iterator<MapObject> iter = layer.getObjects().iterator();
+        while (iter.hasNext()) {
+            MapObject obj = iter.next();
+            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", obj.getProperties().get("x"), obj.getProperties().get("y")));
+            Entity enemy = new Entity();
+            enemy.add(new PositionComponent((Float) obj.getProperties().get("x"), (Float) obj.getProperties().get("y")));
+            enemy.add(new CircleCollisionComponent(10));
+            enemy.add(new MoveTypeComponent(MoveTypeComponent.Type.TargetPlayer, player.getComponent(PositionComponent.class).getPosition()));
+            engine.addEntity(enemy);
+        }
     }
 
     @Override
     public void show() {
+        handleInput();
     }
 
     @Override
     public void render(float delta) {
-        handleInput();
         viewport.getCamera().update();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
