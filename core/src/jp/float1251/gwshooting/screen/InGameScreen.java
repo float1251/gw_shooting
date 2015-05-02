@@ -22,6 +22,7 @@ import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
+import jp.float1251.gwshooting.type.MovingType;
 
 /**
  * Created by takahiroiwatani on 2015/04/30.
@@ -54,7 +55,7 @@ public class InGameScreen implements Screen {
         player.add(new CircleCollisionComponent(10));
         engine.addEntity(player);
 
-        // ‚µ‚Étmx‚©‚çobject‚ğ“Ç‚İ‚İA“G‚ğoŒ»‚³‚¹‚é
+        // tmxã‚’èª­ã¿è¾¼ã‚“ã§objectã‹ã‚‰æ•µã‚’å‡ºç¾ã•ã›ã‚‹
         TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
         MapLayer layer = map.getLayers().get("Enemy");
         Iterator<MapObject> iter = layer.getObjects().iterator();
@@ -64,7 +65,7 @@ public class InGameScreen implements Screen {
             Entity enemy = new Entity();
             enemy.add(new PositionComponent((Float) obj.getProperties().get("x"), (Float) obj.getProperties().get("y")));
             enemy.add(new CircleCollisionComponent(10));
-            enemy.add(new MoveTypeComponent(MoveTypeComponent.Type.TargetPlayer, player.getComponent(PositionComponent.class).getPosition()));
+            enemy.add(new MoveTypeComponent(MovingType.TARGET, player.getComponent(PositionComponent.class).getPosition()));
             engine.addEntity(enemy);
         }
     }

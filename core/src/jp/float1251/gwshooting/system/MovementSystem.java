@@ -19,21 +19,22 @@ public class MovementSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         MoveTypeComponent mc = entity.getComponent(MoveTypeComponent.class);
+        float speed = 100;
         switch (mc.type) {
-            case TargetPlayer:
-                handleTargetPlayerMove(entity, deltaTime);
+            case TARGET:
+                moveToTarget(entity, deltaTime, speed);
                 break;
-            case Velocity:
+            case VELOCITY:
                 break;
 
         }
     }
 
-    private void handleTargetPlayerMove(Entity entity, float deltaTime) {
+    private void moveToTarget(Entity entity, float deltaTime, float speed) {
         MoveTypeComponent mc = entity.getComponent(MoveTypeComponent.class);
         Vector2 from = entity.getComponent(PositionComponent.class).getPosition();
         Vector2 to = mc.target;
-        Vector2 velocity = to.cpy().sub(from).nor().scl(50 * deltaTime);
+        Vector2 velocity = to.cpy().sub(from).nor().scl(speed * deltaTime);
         entity.getComponent(PositionComponent.class).getPosition().add(velocity);
     }
 }
