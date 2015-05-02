@@ -22,8 +22,10 @@ import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.pool.EnemyPool;
 import jp.float1251.gwshooting.system.BulletEmissionSystem;
+import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
+import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
 import jp.float1251.gwshooting.util.TMXUtils;
 
@@ -55,9 +57,11 @@ public class InGameScreen implements Screen {
         engine.addSystem(new MovementSystem());
         engine.addSystem(new BulletEmissionSystem());
         engine.addSystem(new DebugCollisionRenderingSystem((com.badlogic.gdx.graphics.OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new CollisionSystem(enemyPool, engine.getSystem(BulletEmissionSystem.class).bulletPool));
 
         // add Component
         player = new Entity();
+        player.flags = GameObjectType.PLAYER.getFlag();
         player.add(new PositionComponent(100, 100));
         player.add(new CircleCollisionComponent(10));
         player.add(new BulletEmissionComponent(1));

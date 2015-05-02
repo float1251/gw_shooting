@@ -15,7 +15,7 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  */
 public class BulletEmissionSystem extends IteratingSystem {
 
-    BulletPool bulletPool = new BulletPool();
+    public BulletPool bulletPool = new BulletPool();
     private Engine engine;
 
     public BulletEmissionSystem() {
