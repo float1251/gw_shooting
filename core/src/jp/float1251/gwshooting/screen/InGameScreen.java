@@ -17,12 +17,15 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import java.util.Iterator;
 
 import jp.float1251.gwshooting.GWShooting;
+import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
-import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
+import jp.float1251.gwshooting.pool.EnemyPool;
+import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
-import jp.float1251.gwshooting.type.MovingType;
+import jp.float1251.gwshooting.util.ComponentUtils;
+import jp.float1251.gwshooting.util.TMXUtils;
 
 /**
  * Created by takahiroiwatani on 2015/04/30.
@@ -34,6 +37,7 @@ public class InGameScreen implements Screen {
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
+    private EnemyPool enemyPool;
 
     public InGameScreen(GWShooting game) {
         this.game = game;
@@ -44,15 +48,19 @@ public class InGameScreen implements Screen {
     }
 
     private void initialize() {
+        enemyPool = new EnemyPool();
+
         engine = new Engine();
         // add System
         engine.addSystem(new MovementSystem());
+        engine.addSystem(new BulletEmissionSystem());
         engine.addSystem(new DebugCollisionRenderingSystem((com.badlogic.gdx.graphics.OrthographicCamera) viewport.getCamera()));
 
         // add Component
         player = new Entity();
         player.add(new PositionComponent(100, 100));
         player.add(new CircleCollisionComponent(10));
+        player.add(new BulletEmissionComponent(1));
         engine.addEntity(player);
 
         // tmxを読み込んでobjectから敵を出現させる
@@ -61,11 +69,10 @@ public class InGameScreen implements Screen {
         Iterator<MapObject> iter = layer.getObjects().iterator();
         while (iter.hasNext()) {
             MapObject obj = iter.next();
-            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", obj.getProperties().get("x"), obj.getProperties().get("y")));
-            Entity enemy = new Entity();
-            enemy.add(new PositionComponent((Float) obj.getProperties().get("x"), (Float) obj.getProperties().get("y")));
-            enemy.add(new CircleCollisionComponent(10));
-            enemy.add(new MoveTypeComponent(MovingType.TARGET, player.getComponent(PositionComponent.class).getPosition()));
+            Vector2 pos = TMXUtils.getPosition(obj.getProperties());
+            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", pos.x, pos.y));
+            Entity enemy = enemyPool.obtain(pos,
+                    ComponentUtils.getPositionComponent(player).getPosition());
             engine.addEntity(enemy);
         }
     }
@@ -132,7 +139,7 @@ public class InGameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                startPosition = player.getComponent(PositionComponent.class).getPosition();
+                startPosition = ComponentUtils.getPositionComponent(player).getPosition();
                 return false;
             }
 
@@ -144,7 +151,7 @@ public class InGameScreen implements Screen {
             @Override
             public boolean touchDragged(int screenX, int screenY, int pointer) {
                 Vector2 pos = viewport.unproject(new Vector2(screenX, screenY));
-                player.getComponent(PositionComponent.class).setPosition(pos.x, pos.y);
+                ComponentUtils.getPositionComponent(player).setPosition(pos.x, pos.y);
                 return false;
             }
 
