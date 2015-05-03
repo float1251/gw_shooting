@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import jp.float1251.gwshooting.component.BulletComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.ParticleEffectComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.listener.BulletDestroyListener;
 import jp.float1251.gwshooting.listener.EnemyDestroyListener;
@@ -25,10 +26,10 @@ public class CollisionSystem extends EntitySystem {
     private final BulletDestroyListener bdListener;
     private Engine engine;
 
-    public CollisionSystem(EnemyDestroyListener listener, BulletDestroyListener bdListenrer) {
+    public CollisionSystem(EnemyDestroyListener listener, BulletDestroyListener bdListener) {
         super();
         this.listener = listener;
-        this.bdListener = bdListenrer;
+        this.bdListener = bdListener;
     }
 
     public void addedToEngine(Engine engine) {
@@ -55,10 +56,17 @@ public class CollisionSystem extends EntitySystem {
                 // ダメージを与えた結果、0になっていたら消滅させる
                 if (target.flags == bulletTarget.getFlag()) {
                     if (checkCollision(bullet, target)) {
+                        // 爆発エフェクト
+                        ParticleEffectComponent effect = ComponentUtils.createParticleEffectComponent(
+                                ComponentUtils.getPositionComponent(bullet).getPosition().cpy()
+                        );
+                        engine.addEntity(new Entity().add(effect));
+                        // 削除処理
                         listener.destroyEnemy(target);
                         bdListener.destroyBullet(bullet);
                         engine.removeEntity(bullet);
                         engine.removeEntity(target);
+
                         break;
                     }
                 }

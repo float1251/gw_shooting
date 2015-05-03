@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -25,6 +26,7 @@ import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
+import jp.float1251.gwshooting.system.ParticleEffectSystem;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
 import jp.float1251.gwshooting.util.TMXUtils;
@@ -56,15 +58,16 @@ public class InGameScreen implements Screen {
         // add System
         engine.addSystem(new MovementSystem());
         engine.addSystem(new BulletEmissionSystem());
-        engine.addSystem(new DebugCollisionRenderingSystem((com.badlogic.gdx.graphics.OrthographicCamera) viewport.getCamera()));
         engine.addSystem(new CollisionSystem(enemyPool, engine.getSystem(BulletEmissionSystem.class).bulletPool));
+        engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new ParticleEffectSystem(batch, (OrthographicCamera) viewport.getCamera()));
 
         // add Component
         player = new Entity();
         player.flags = GameObjectType.PLAYER.getFlag();
-        player.add(new PositionComponent(100, 100));
+        player.add(new PositionComponent(0, 0));
         player.add(new CircleCollisionComponent(10));
-        player.add(new BulletEmissionComponent(1));
+        player.add(new BulletEmissionComponent(0.25f));
         engine.addEntity(player);
 
         // tmxを読み込んでobjectから敵を出現させる
@@ -79,6 +82,7 @@ public class InGameScreen implements Screen {
                     ComponentUtils.getPositionComponent(player).getPosition());
             engine.addEntity(enemy);
         }
+
     }
 
     @Override
@@ -93,9 +97,6 @@ public class InGameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         engine.update(delta);
-
-        batch.begin();
-        batch.end();
     }
 
     @Override

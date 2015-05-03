@@ -25,7 +25,7 @@ public class BulletPool extends Pool<Entity> implements BulletDestroyListener {
         bullet.add(new BulletComponent(BulletType.BULLET));
         bullet.add(new MoveTypeComponent(MovingType.VELOCITY));
         bullet.add(new CircleCollisionComponent(4));
-        bullet.add(new VelocityComponent(0, 300));
+        bullet.add(new VelocityComponent(0, 400));
         return bullet;
     }
 
