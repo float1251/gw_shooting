@@ -13,8 +13,7 @@ import jp.float1251.gwshooting.component.BulletComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.ParticleEffectComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.listener.BulletDestroyListener;
-import jp.float1251.gwshooting.listener.EnemyDestroyListener;
+import jp.float1251.gwshooting.pool.PoolManager;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
@@ -22,14 +21,12 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  * Created by takahiroiwatani on 2015/05/02.
  */
 public class CollisionSystem extends EntitySystem {
-    private final EnemyDestroyListener listener;
-    private final BulletDestroyListener bdListener;
+    private final PoolManager manager;
     private Engine engine;
 
-    public CollisionSystem(EnemyDestroyListener listener, BulletDestroyListener bdListener) {
+    public CollisionSystem(PoolManager manager) {
         super();
-        this.listener = listener;
-        this.bdListener = bdListener;
+        this.manager = manager;
     }
 
     public void addedToEngine(Engine engine) {
@@ -62,8 +59,8 @@ public class CollisionSystem extends EntitySystem {
                         );
                         engine.addEntity(new Entity().add(effect));
                         // 削除処理
-                        listener.destroyEnemy(target);
-                        bdListener.destroyBullet(bullet);
+                        manager.removeEntity(target);
+                        manager.removeEntity(bullet);
                         engine.removeEntity(bullet);
                         engine.removeEntity(target);
 

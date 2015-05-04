@@ -3,7 +3,6 @@ package jp.float1251.gwshooting.screen;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -21,7 +20,9 @@ import jp.float1251.gwshooting.GWShooting;
 import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.pool.EnemyPool;
+import jp.float1251.gwshooting.factory.EnemyFactory;
+import jp.float1251.gwshooting.input.GameInputProcessor;
+import jp.float1251.gwshooting.pool.PoolManager;
 import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
@@ -38,32 +39,31 @@ public class InGameScreen implements Screen {
 
     private final GWShooting game;
     private final SpriteBatch batch;
+    private final PoolManager poolManager;
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
-    private EnemyPool enemyPool;
 
     public InGameScreen(GWShooting game) {
         this.game = game;
         this.batch = game.getSpriteBatch();
         this.viewport = new FitViewport(640, 960);
+        this.poolManager = new PoolManager();
 
         initialize();
     }
 
     private void initialize() {
-        enemyPool = new EnemyPool();
-
         engine = new Engine();
         // add System
-        engine.addSystem(new MovementSystem());
-        engine.addSystem(new BulletEmissionSystem());
-        engine.addSystem(new CollisionSystem(enemyPool, engine.getSystem(BulletEmissionSystem.class).bulletPool));
+        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new BulletEmissionSystem(poolManager));
+        engine.addSystem(new CollisionSystem(poolManager));
         engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
         engine.addSystem(new ParticleEffectSystem(batch, (OrthographicCamera) viewport.getCamera()));
 
         // add Component
-        player = new Entity();
+        player = poolManager.obtainEntity();
         player.flags = GameObjectType.PLAYER.getFlag();
         player.add(new PositionComponent(0, 0));
         player.add(new CircleCollisionComponent(10));
@@ -78,7 +78,7 @@ public class InGameScreen implements Screen {
             MapObject obj = iter.next();
             Vector2 pos = TMXUtils.getPosition(obj.getProperties());
             Gdx.app.log("ENEMY", String.format("x: %f, y: %f", pos.x, pos.y));
-            Entity enemy = enemyPool.obtain(pos,
+            Entity enemy = EnemyFactory.createEnemy(poolManager, pos,
                     ComponentUtils.getPositionComponent(player).getPosition());
             engine.addEntity(enemy);
         }
@@ -87,7 +87,7 @@ public class InGameScreen implements Screen {
 
     @Override
     public void show() {
-        handleInput();
+        Gdx.input.setInputProcessor(new GameInputProcessor(player, viewport));
     }
 
     @Override
@@ -123,52 +123,4 @@ public class InGameScreen implements Screen {
     public void dispose() {
     }
 
-    private void handleInput() {
-        Gdx.input.setInputProcessor(new InputProcessor() {
-            public Vector2 startPosition;
-
-            @Override
-            public boolean keyDown(int keycode) {
-                return false;
-            }
-
-            @Override
-            public boolean keyUp(int keycode) {
-                return false;
-            }
-
-            @Override
-            public boolean keyTyped(char character) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                startPosition = ComponentUtils.getPositionComponent(player).getPosition();
-                return false;
-            }
-
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDragged(int screenX, int screenY, int pointer) {
-                Vector2 pos = viewport.unproject(new Vector2(screenX, screenY));
-                ComponentUtils.getPositionComponent(player).setPosition(pos.x, pos.y);
-                return false;
-            }
-
-            @Override
-            public boolean mouseMoved(int screenX, int screenY) {
-                return false;
-            }
-
-            @Override
-            public boolean scrolled(int amount) {
-                return false;
-            }
-        });
-    }
 }

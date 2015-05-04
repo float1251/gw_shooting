@@ -7,7 +7,8 @@ import com.badlogic.ashley.systems.IteratingSystem;
 
 import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.pool.BulletPool;
+import jp.float1251.gwshooting.factory.BulletFactory;
+import jp.float1251.gwshooting.pool.PoolManager;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
 /**
@@ -15,11 +16,12 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  */
 public class BulletEmissionSystem extends IteratingSystem {
 
-    public BulletPool bulletPool = new BulletPool();
+    private final PoolManager manager;
     private Engine engine;
 
-    public BulletEmissionSystem() {
+    public BulletEmissionSystem(PoolManager manager) {
         super(Family.all(BulletEmissionComponent.class, PositionComponent.class).get());
+        this.manager = manager;
     }
 
 
@@ -37,7 +39,7 @@ public class BulletEmissionSystem extends IteratingSystem {
         bec.time += deltaTime;
         if (bec.time >= bec.interval) {
             // instantiate bullet
-            Entity bullet = bulletPool.obtain();
+            Entity bullet = BulletFactory.createFactory(manager);
             ComponentUtils.getPositionComponent(bullet).setPosition(pc.getPosition().cpy());
             engine.addEntity(bullet);
             bec.time = 0;
