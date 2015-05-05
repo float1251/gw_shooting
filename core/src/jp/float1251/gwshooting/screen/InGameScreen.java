@@ -19,6 +19,7 @@ import java.util.Iterator;
 import jp.float1251.gwshooting.GWShooting;
 import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.factory.EnemyFactory;
 import jp.float1251.gwshooting.input.GameInputProcessor;
@@ -27,6 +28,7 @@ import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
+import jp.float1251.gwshooting.system.OrbitalFlightSystem;
 import jp.float1251.gwshooting.system.ParticleEffectSystem;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
@@ -56,7 +58,8 @@ public class InGameScreen implements Screen {
     private void initialize() {
         engine = new Engine();
         // add System
-        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new OrbitalFlightSystem(poolManager));
+        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera(), poolManager));
         engine.addSystem(new BulletEmissionSystem(poolManager));
         engine.addSystem(new CollisionSystem(poolManager));
         engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
@@ -83,6 +86,21 @@ public class InGameScreen implements Screen {
             engine.addEntity(enemy);
         }
 
+        // test orbital flight
+        Entity enemy = new Entity();
+        Vector2 pos = new Vector2(100, 100);
+        enemy.flags = GameObjectType.ENEMY.getFlag();
+        enemy.add(new PositionComponent(pos.x, pos.y));
+        enemy.add(new CircleCollisionComponent(10));
+        OrbitalFlightComponent ofc = new OrbitalFlightComponent();
+        ofc.dataArray = new OrbitalFlightComponent.OrbitalFlightData[5];
+        ofc.dataArray[0] = new OrbitalFlightComponent.OrbitalFlightData(3, -30, 3);
+        ofc.dataArray[1] = new OrbitalFlightComponent.OrbitalFlightData(30, -30, 3);
+        ofc.dataArray[2] = new OrbitalFlightComponent.OrbitalFlightData(-30, -30, 3);
+        ofc.dataArray[3] = new OrbitalFlightComponent.OrbitalFlightData(-30, -30, 3);
+        ofc.dataArray[4] = new OrbitalFlightComponent.OrbitalFlightData(30, 300, 3);
+        enemy.add(ofc);
+        engine.addEntity(enemy);
     }
 
     @Override

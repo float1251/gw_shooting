@@ -53,6 +53,7 @@ public class CollisionSystem extends EntitySystem {
                 // ダメージを与えた結果、0になっていたら消滅させる
                 if (target.flags == bulletTarget.getFlag()) {
                     if (checkCollision(bullet, target)) {
+
                         // 爆発エフェクト
                         ParticleEffectComponent effect = ComponentUtils.createParticleEffectComponent(
                                 ComponentUtils.getPositionComponent(bullet).getPosition().cpy()
@@ -63,7 +64,6 @@ public class CollisionSystem extends EntitySystem {
                         manager.removeEntity(bullet);
                         engine.removeEntity(bullet);
                         engine.removeEntity(target);
-
                         break;
                     }
                 }

@@ -1,5 +1,6 @@
 package jp.float1251.gwshooting.system;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.component.VelocityComponent;
+import jp.float1251.gwshooting.pool.PoolManager;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
 /**
@@ -18,10 +20,20 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  */
 public class MovementSystem extends IteratingSystem {
     private final OrthographicCamera camera;
+    private final PoolManager manager;
+    private Engine engine;
 
-    public MovementSystem(OrthographicCamera camera) {
+    public MovementSystem(OrthographicCamera camera, PoolManager manager) {
         super(Family.all(MoveTypeComponent.class, PositionComponent.class).get());
+        this.manager = manager;
         this.camera = camera;
+    }
+
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        this.engine = engine;
     }
 
     @Override
@@ -38,8 +50,11 @@ public class MovementSystem extends IteratingSystem {
         }
         PositionComponent pc = ComponentUtils.getPositionComponent(entity);
         Vector2 pos = pc.getPosition();
-        if(checkDestroyEntity(pos)){
-            // TODO 削除する
+        if (checkDestroyEntity(pos)) {
+            // 削除する
+            Gdx.app.log("Move", "delete entity");
+            manager.removeEntity(entity);
+            engine.removeEntity(entity);
         }
     }
 
