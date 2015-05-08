@@ -13,7 +13,7 @@ import jp.float1251.gwshooting.component.BulletComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.ParticleEffectComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.pool.PoolManager;
+import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
@@ -21,10 +21,10 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  * Created by takahiroiwatani on 2015/05/02.
  */
 public class CollisionSystem extends EntitySystem {
-    private final PoolManager manager;
+    private final ObjectPool manager;
     private Engine engine;
 
-    public CollisionSystem(PoolManager manager) {
+    public CollisionSystem(ObjectPool manager) {
         super();
         this.manager = manager;
     }

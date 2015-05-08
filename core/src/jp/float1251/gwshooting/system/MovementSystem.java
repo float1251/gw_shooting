@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector3;
 import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.component.VelocityComponent;
-import jp.float1251.gwshooting.pool.PoolManager;
+import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
 /**
@@ -20,10 +20,10 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  */
 public class MovementSystem extends IteratingSystem {
     private final OrthographicCamera camera;
-    private final PoolManager manager;
+    private final ObjectPool manager;
     private Engine engine;
 
-    public MovementSystem(OrthographicCamera camera, PoolManager manager) {
+    public MovementSystem(OrthographicCamera camera, ObjectPool manager) {
         super(Family.all(MoveTypeComponent.class, PositionComponent.class).get());
         this.manager = manager;
         this.camera = camera;

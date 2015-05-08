@@ -7,17 +7,17 @@ import com.badlogic.ashley.systems.IteratingSystem;
 
 import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.pool.PoolManager;
+import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
 /**
  * Created by takahiroiwatani on 2015/05/05.
  */
 public class OrbitalFlightSystem extends IteratingSystem {
-    private final PoolManager manager;
+    private final ObjectPool manager;
     private Engine engine;
 
-    public OrbitalFlightSystem(PoolManager manager) {
+    public OrbitalFlightSystem(ObjectPool manager) {
         super(Family.all(OrbitalFlightComponent.class, PositionComponent.class).get());
         this.manager = manager;
     }

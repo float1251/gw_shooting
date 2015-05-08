@@ -7,7 +7,7 @@ import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.component.VelocityComponent;
-import jp.float1251.gwshooting.pool.PoolManager;
+import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.type.BulletType;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.type.MovingType;
@@ -20,8 +20,8 @@ public class BulletFactory {
     private BulletFactory() {
     }
 
-    public static Entity createFactory(PoolManager manager) {
-        Entity bullet = manager.obtainEntity();
+    public static Entity createFactory(ObjectPool manager) {
+        Entity bullet = manager.createEntity();
         bullet.flags = GameObjectType.BULLET.getFlag();
         bullet.add(new PositionComponent(0, 0));
         bullet.add(new BulletComponent(BulletType.BULLET));

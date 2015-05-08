@@ -23,7 +23,7 @@ import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.factory.EnemyFactory;
 import jp.float1251.gwshooting.input.GameInputProcessor;
-import jp.float1251.gwshooting.pool.PoolManager;
+import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
@@ -41,7 +41,7 @@ public class InGameScreen implements Screen {
 
     private final GWShooting game;
     private final SpriteBatch batch;
-    private final PoolManager poolManager;
+    private final ObjectPool pool;
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
@@ -50,7 +50,7 @@ public class InGameScreen implements Screen {
         this.game = game;
         this.batch = game.getSpriteBatch();
         this.viewport = new FitViewport(640, 960);
-        this.poolManager = new PoolManager();
+        this.pool = new ObjectPool();
 
         initialize();
     }
@@ -58,22 +58,22 @@ public class InGameScreen implements Screen {
     private void initialize() {
         engine = new Engine();
         // add System
-        engine.addSystem(new OrbitalFlightSystem(poolManager));
-        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera(), poolManager));
-        engine.addSystem(new BulletEmissionSystem(poolManager));
-        engine.addSystem(new CollisionSystem(poolManager));
+        engine.addSystem(new OrbitalFlightSystem(pool));
+        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera(), pool));
+        engine.addSystem(new BulletEmissionSystem(pool));
+        engine.addSystem(new CollisionSystem(pool));
         engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
         engine.addSystem(new ParticleEffectSystem(batch, (OrthographicCamera) viewport.getCamera()));
 
         // add Component
-        player = poolManager.obtainEntity();
+        player = pool.createEntity();
         player.flags = GameObjectType.PLAYER.getFlag();
         player.add(new PositionComponent(0, 0));
         player.add(new CircleCollisionComponent(10));
         player.add(new BulletEmissionComponent(0.25f));
         engine.addEntity(player);
 
-        // tmxを読み込んでobjectから敵を出現させる
+        // tmxから読み込んでenemyを作成する
         TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
         MapLayer layer = map.getLayers().get("Enemy");
         Iterator<MapObject> iter = layer.getObjects().iterator();
@@ -81,7 +81,7 @@ public class InGameScreen implements Screen {
             MapObject obj = iter.next();
             Vector2 pos = TMXUtils.getPosition(obj.getProperties());
             Gdx.app.log("ENEMY", String.format("x: %f, y: %f", pos.x, pos.y));
-            Entity enemy = EnemyFactory.createEnemy(poolManager, pos,
+            Entity enemy = EnemyFactory.createEnemy(pool, pos,
                     ComponentUtils.getPositionComponent(player).getPosition());
             engine.addEntity(enemy);
         }
