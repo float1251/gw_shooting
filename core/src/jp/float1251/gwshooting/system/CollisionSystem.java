@@ -14,6 +14,7 @@ import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.ParticleEffectComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.pool.ObjectPool;
+import jp.float1251.gwshooting.sound.SoundManager;
 import jp.float1251.gwshooting.type.GameObjectType;
 import jp.float1251.gwshooting.util.ComponentUtils;
 
@@ -22,11 +23,13 @@ import jp.float1251.gwshooting.util.ComponentUtils;
  */
 public class CollisionSystem extends EntitySystem {
     private final ObjectPool manager;
+    private final SoundManager soundManager;
     private Engine engine;
 
-    public CollisionSystem(ObjectPool manager) {
+    public CollisionSystem(ObjectPool manager, SoundManager soundManager) {
         super();
         this.manager = manager;
+        this.soundManager = soundManager;
     }
 
     public void addedToEngine(Engine engine) {
@@ -58,6 +61,7 @@ public class CollisionSystem extends EntitySystem {
                         ParticleEffectComponent effect = ComponentUtils.createParticleEffectComponent(
                                 ComponentUtils.getPositionComponent(bullet).getPosition().cpy()
                         );
+                        soundManager.playSoundEffect("destruction1.mp3");
                         engine.addEntity(new Entity().add(effect));
                         // 削除処理
                         manager.removeEntity(target);

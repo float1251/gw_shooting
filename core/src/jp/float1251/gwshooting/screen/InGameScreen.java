@@ -24,6 +24,7 @@ import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.factory.EnemyFactory;
 import jp.float1251.gwshooting.input.GameInputProcessor;
 import jp.float1251.gwshooting.pool.ObjectPool;
+import jp.float1251.gwshooting.sound.SoundManager;
 import jp.float1251.gwshooting.system.BulletEmissionSystem;
 import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
@@ -42,6 +43,7 @@ public class InGameScreen implements Screen {
     private final GWShooting game;
     private final SpriteBatch batch;
     private final ObjectPool pool;
+    private final SoundManager soundManager;
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
@@ -52,6 +54,9 @@ public class InGameScreen implements Screen {
         this.viewport = new FitViewport(640, 960);
         this.pool = new ObjectPool();
 
+        this.soundManager = new SoundManager();
+        soundManager.playMusic("bgm.mp3", true);
+
         initialize();
     }
 
@@ -61,7 +66,7 @@ public class InGameScreen implements Screen {
         engine.addSystem(new OrbitalFlightSystem(pool));
         engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera(), pool));
         engine.addSystem(new BulletEmissionSystem(pool));
-        engine.addSystem(new CollisionSystem(pool));
+        engine.addSystem(new CollisionSystem(pool, soundManager));
         engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
         engine.addSystem(new ParticleEffectSystem(batch, (OrthographicCamera) viewport.getCamera()));
 
@@ -139,6 +144,7 @@ public class InGameScreen implements Screen {
 
     @Override
     public void dispose() {
+        soundManager.dispose();
     }
 
 }
