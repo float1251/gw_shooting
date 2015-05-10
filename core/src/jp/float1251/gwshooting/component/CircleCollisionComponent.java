@@ -5,15 +5,17 @@ import com.badlogic.ashley.core.Component;
 /**
  * Created by takahiroiwatani on 2015/04/30.
  */
-public class CircleCollisionComponent extends Component{
+public class CircleCollisionComponent extends Component {
     public float r;
+    public float type;
+    public float target;
 
-    public CircleCollisionComponent(float r){
+    public CircleCollisionComponent(float r) {
         this.r = r;
     }
 
-    public CircleCollisionComponent(){
-        this. r = 0;
+    public CircleCollisionComponent() {
+        this.r = 0;
     }
 
 }

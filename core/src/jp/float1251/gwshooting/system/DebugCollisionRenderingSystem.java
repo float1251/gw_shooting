@@ -26,7 +26,7 @@ public class DebugCollisionRenderingSystem extends IteratingSystem {
     public DebugCollisionRenderingSystem(OrthographicCamera camera) {
         super(Family.all(PositionComponent.class, CircleCollisionComponent.class).get());
         this.shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(new Color(155/255f, 89/255f, 182/255f, 1));
         this.camera = camera;
     }
 
@@ -40,7 +40,7 @@ public class DebugCollisionRenderingSystem extends IteratingSystem {
             Entity entity = iter.next();
             PositionComponent pc = pm.get(entity);
             CircleCollisionComponent cc = cm.get(entity);
-            shapeRenderer.circle(pc.getPosition().x, pc.getPosition().y, cc.r);
+            shapeRenderer.circle(pc.getPosition().x, pc.getPosition().y, cc.r, 10);
         }
         shapeRenderer.end();
     }

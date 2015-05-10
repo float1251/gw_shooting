@@ -10,10 +10,14 @@ import jp.float1251.gwshooting.type.MovingType;
  */
 public class MoveTypeComponent extends Component {
     public final MovingType type;
-    public final Vector2 target;
+    public Vector2 target;
 
     public MoveTypeComponent(MovingType type, Vector2 target) {
         this.type = type;
         this.target = target;
+    }
+
+    public MoveTypeComponent(MovingType type){
+        this(type, null);
     }
 }

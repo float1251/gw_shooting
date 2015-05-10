@@ -10,8 +10,13 @@ public class VelocityComponent extends Component{
     private Vector2 velocity;
 
     public VelocityComponent(){
-        velocity = new Vector2();
+        this(0, 0);
     }
+
+    public VelocityComponent(float x, float y){
+        velocity = new Vector2(x, y);
+    }
+
 
     public Vector2 getVelocity(){
         return velocity;

@@ -1,9 +1,9 @@
 package jp.float1251.gwshooting.component;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.ashley.core.Entity;
 
 import jp.float1251.gwshooting.type.BulletType;
+import jp.float1251.gwshooting.type.GameObjectType;
 
 
 /**
@@ -12,15 +12,17 @@ import jp.float1251.gwshooting.type.BulletType;
  */
 public class BulletComponent extends Component {
 
-    public Entity target;
+    public float damage;
+    public GameObjectType target;
     public BulletType type;
 
     public BulletComponent(BulletType type) {
-        this(type, null);
+        this(type, GameObjectType.ENEMY);
     }
 
-    public BulletComponent(BulletType type, Entity target) {
+    public BulletComponent(BulletType type, GameObjectType target) {
         this.type = type;
         this.target = target;
+        this.damage = 1f;
     }
 }

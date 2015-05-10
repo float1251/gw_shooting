@@ -3,26 +3,30 @@ package jp.float1251.gwshooting.screen;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import java.util.Iterator;
-
 import jp.float1251.gwshooting.GWShooting;
+import jp.float1251.gwshooting.Stage;
+import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
-import jp.float1251.gwshooting.component.MoveTypeComponent;
+import jp.float1251.gwshooting.component.HealthComponent;
+import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
+import jp.float1251.gwshooting.input.GameInputProcessor;
+import jp.float1251.gwshooting.pool.ObjectPool;
+import jp.float1251.gwshooting.sound.SoundManager;
+import jp.float1251.gwshooting.system.BulletEmissionSystem;
+import jp.float1251.gwshooting.system.CollisionSystem;
 import jp.float1251.gwshooting.system.DebugCollisionRenderingSystem;
 import jp.float1251.gwshooting.system.MovementSystem;
-import jp.float1251.gwshooting.type.MovingType;
+import jp.float1251.gwshooting.system.OrbitalFlightSystem;
+import jp.float1251.gwshooting.system.ParticleEffectSystem;
+import jp.float1251.gwshooting.type.GameObjectType;
 
 /**
  * Created by takahiroiwatani on 2015/04/30.
@@ -31,14 +35,21 @@ public class InGameScreen implements Screen {
 
     private final GWShooting game;
     private final SpriteBatch batch;
+    private final ObjectPool pool;
+    private final SoundManager soundManager;
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
+    private Stage stage;
 
     public InGameScreen(GWShooting game) {
         this.game = game;
         this.batch = game.getSpriteBatch();
         this.viewport = new FitViewport(640, 960);
+        this.pool = new ObjectPool();
+
+        this.soundManager = new SoundManager();
+        soundManager.playMusic("bgm.mp3", true);
 
         initialize();
     }
@@ -46,33 +57,45 @@ public class InGameScreen implements Screen {
     private void initialize() {
         engine = new Engine();
         // add System
-        engine.addSystem(new MovementSystem());
-        engine.addSystem(new DebugCollisionRenderingSystem((com.badlogic.gdx.graphics.OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new OrbitalFlightSystem(pool));
+        engine.addSystem(new MovementSystem((OrthographicCamera) viewport.getCamera(), pool));
+        engine.addSystem(new BulletEmissionSystem(pool));
+        engine.addSystem(new CollisionSystem(pool, soundManager));
+        engine.addSystem(new DebugCollisionRenderingSystem((OrthographicCamera) viewport.getCamera()));
+        engine.addSystem(new ParticleEffectSystem(batch, (OrthographicCamera) viewport.getCamera()));
 
         // add Component
-        player = new Entity();
-        player.add(new PositionComponent(100, 100));
+        player = pool.createEntity();
+        player.flags = GameObjectType.PLAYER.getFlag();
+        player.add(new PositionComponent(0, 0));
         player.add(new CircleCollisionComponent(10));
+        player.add(new BulletEmissionComponent(0.25f));
         engine.addEntity(player);
 
-        // tmxを読み込んでobjectから敵を出現させる
-        TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
-        MapLayer layer = map.getLayers().get("Enemy");
-        Iterator<MapObject> iter = layer.getObjects().iterator();
-        while (iter.hasNext()) {
-            MapObject obj = iter.next();
-            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", obj.getProperties().get("x"), obj.getProperties().get("y")));
-            Entity enemy = new Entity();
-            enemy.add(new PositionComponent((Float) obj.getProperties().get("x"), (Float) obj.getProperties().get("y")));
-            enemy.add(new CircleCollisionComponent(10));
-            enemy.add(new MoveTypeComponent(MovingType.TARGET, player.getComponent(PositionComponent.class).getPosition()));
-            engine.addEntity(enemy);
-        }
+        // tmxから読み込んでenemyを作成する
+        this.stage = new Stage(engine, "stage/stage.tmx", pool, player, viewport.getWorldHeight());
+
+        // test orbital flight
+        Entity enemy = new Entity();
+        Vector2 pos = new Vector2(100, 100);
+        enemy.flags = GameObjectType.ENEMY.getFlag();
+        enemy.add(new PositionComponent(pos.x, pos.y));
+        enemy.add(new CircleCollisionComponent(10));
+        enemy.add(new HealthComponent(2));
+        OrbitalFlightComponent ofc = new OrbitalFlightComponent();
+        ofc.dataArray = new OrbitalFlightComponent.OrbitalFlightData[5];
+        ofc.dataArray[0] = new OrbitalFlightComponent.OrbitalFlightData(3, -30, 3);
+        ofc.dataArray[1] = new OrbitalFlightComponent.OrbitalFlightData(30, -30, 3);
+        ofc.dataArray[2] = new OrbitalFlightComponent.OrbitalFlightData(-30, -30, 3);
+        ofc.dataArray[3] = new OrbitalFlightComponent.OrbitalFlightData(-30, -30, 3);
+        ofc.dataArray[4] = new OrbitalFlightComponent.OrbitalFlightData(30, 300, 3);
+        enemy.add(ofc);
+        engine.addEntity(enemy);
     }
 
     @Override
     public void show() {
-        handleInput();
+        Gdx.input.setInputProcessor(new GameInputProcessor(player, viewport));
     }
 
     @Override
@@ -81,10 +104,8 @@ public class InGameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        stage.update(delta);
         engine.update(delta);
-
-        batch.begin();
-        batch.end();
     }
 
     @Override
@@ -109,54 +130,7 @@ public class InGameScreen implements Screen {
 
     @Override
     public void dispose() {
+        soundManager.dispose();
     }
 
-    private void handleInput() {
-        Gdx.input.setInputProcessor(new InputProcessor() {
-            public Vector2 startPosition;
-
-            @Override
-            public boolean keyDown(int keycode) {
-                return false;
-            }
-
-            @Override
-            public boolean keyUp(int keycode) {
-                return false;
-            }
-
-            @Override
-            public boolean keyTyped(char character) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                startPosition = player.getComponent(PositionComponent.class).getPosition();
-                return false;
-            }
-
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDragged(int screenX, int screenY, int pointer) {
-                Vector2 pos = viewport.unproject(new Vector2(screenX, screenY));
-                player.getComponent(PositionComponent.class).setPosition(pos.x, pos.y);
-                return false;
-            }
-
-            @Override
-            public boolean mouseMoved(int screenX, int screenY) {
-                return false;
-            }
-
-            @Override
-            public boolean scrolled(int amount) {
-                return false;
-            }
-        });
-    }
 }
