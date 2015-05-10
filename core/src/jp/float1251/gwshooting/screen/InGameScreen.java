@@ -7,21 +7,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import java.util.Iterator;
-
 import jp.float1251.gwshooting.GWShooting;
+import jp.float1251.gwshooting.Stage;
 import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
 import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
-import jp.float1251.gwshooting.factory.EnemyFactory;
 import jp.float1251.gwshooting.input.GameInputProcessor;
 import jp.float1251.gwshooting.pool.ObjectPool;
 import jp.float1251.gwshooting.sound.SoundManager;
@@ -32,8 +26,6 @@ import jp.float1251.gwshooting.system.MovementSystem;
 import jp.float1251.gwshooting.system.OrbitalFlightSystem;
 import jp.float1251.gwshooting.system.ParticleEffectSystem;
 import jp.float1251.gwshooting.type.GameObjectType;
-import jp.float1251.gwshooting.util.ComponentUtils;
-import jp.float1251.gwshooting.util.TMXUtils;
 
 /**
  * Created by takahiroiwatani on 2015/04/30.
@@ -47,6 +39,7 @@ public class InGameScreen implements Screen {
     private Engine engine;
     private FitViewport viewport;
     private Entity player;
+    private Stage stage;
 
     public InGameScreen(GWShooting game) {
         this.game = game;
@@ -79,17 +72,7 @@ public class InGameScreen implements Screen {
         engine.addEntity(player);
 
         // tmxから読み込んでenemyを作成する
-        TiledMap map = new TmxMapLoader().load("stage/stage.tmx");
-        MapLayer layer = map.getLayers().get("Enemy");
-        Iterator<MapObject> iter = layer.getObjects().iterator();
-        while (iter.hasNext()) {
-            MapObject obj = iter.next();
-            Vector2 pos = TMXUtils.getPosition(obj.getProperties());
-            Gdx.app.log("ENEMY", String.format("x: %f, y: %f", pos.x, pos.y));
-            Entity enemy = EnemyFactory.createEnemy(pool, pos,
-                    ComponentUtils.getPositionComponent(player).getPosition());
-            engine.addEntity(enemy);
-        }
+        this.stage = new Stage(engine, "stage/stage.tmx", pool, player, viewport.getWorldHeight());
 
         // test orbital flight
         Entity enemy = new Entity();
@@ -119,6 +102,7 @@ public class InGameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        stage.update(delta);
         engine.update(delta);
     }
 

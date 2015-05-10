@@ -28,7 +28,7 @@ public class SoundManager implements Disposable {
         Music music = musicMap.get(fileName);
         if (music.isPlaying())
             return;
-        music.setVolume(0.5f);
+        music.setVolume(0.0f);
         music.setLooping(loop);
         music.play();
     }
