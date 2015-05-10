@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.HealthComponent;
 import jp.float1251.gwshooting.component.MoveTypeComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.pool.ObjectPool;
@@ -24,6 +25,7 @@ public class EnemyFactory {
         enemy.add(new PositionComponent(pos.x, pos.y));
         enemy.add(new CircleCollisionComponent(10));
         enemy.add(new MoveTypeComponent(MovingType.TARGET, target));
+        enemy.add(new HealthComponent(5));
         return enemy;
     }
 

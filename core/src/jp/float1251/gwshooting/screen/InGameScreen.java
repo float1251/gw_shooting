@@ -14,6 +14,7 @@ import jp.float1251.gwshooting.GWShooting;
 import jp.float1251.gwshooting.Stage;
 import jp.float1251.gwshooting.component.BulletEmissionComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.HealthComponent;
 import jp.float1251.gwshooting.component.OrbitalFlightComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.input.GameInputProcessor;
@@ -80,6 +81,7 @@ public class InGameScreen implements Screen {
         enemy.flags = GameObjectType.ENEMY.getFlag();
         enemy.add(new PositionComponent(pos.x, pos.y));
         enemy.add(new CircleCollisionComponent(10));
+        enemy.add(new HealthComponent(2));
         OrbitalFlightComponent ofc = new OrbitalFlightComponent();
         ofc.dataArray = new OrbitalFlightComponent.OrbitalFlightData[5];
         ofc.dataArray[0] = new OrbitalFlightComponent.OrbitalFlightData(3, -30, 3);

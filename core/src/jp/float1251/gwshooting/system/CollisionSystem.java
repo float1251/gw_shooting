@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import jp.float1251.gwshooting.component.BulletComponent;
 import jp.float1251.gwshooting.component.CircleCollisionComponent;
+import jp.float1251.gwshooting.component.HealthComponent;
 import jp.float1251.gwshooting.component.ParticleEffectComponent;
 import jp.float1251.gwshooting.component.PositionComponent;
 import jp.float1251.gwshooting.pool.ObjectPool;
@@ -56,18 +57,21 @@ public class CollisionSystem extends EntitySystem {
                 // ダメージを与えた結果、0になっていたら消滅させる
                 if (target.flags == bulletTarget.getFlag()) {
                     if (checkCollision(bullet, target)) {
-
-                        // 爆発エフェクト
-                        ParticleEffectComponent effect = ComponentUtils.createParticleEffectComponent(
-                                ComponentUtils.getPositionComponent(bullet).getPosition().cpy()
-                        );
-                        soundManager.playSoundEffect("destruction1.mp3");
-                        engine.addEntity(new Entity().add(effect));
-                        // 削除処理
-                        manager.removeEntity(target);
+                        HealthComponent hc = target.getComponent(HealthComponent.class);
+                        hc.life -= bullet.getComponent(BulletComponent.class).damage;
+                        if (hc.life < 0) {
+                            // 爆発エフェクト
+                            ParticleEffectComponent effect = ComponentUtils.createParticleEffectComponent(
+                                    ComponentUtils.getPositionComponent(bullet).getPosition().cpy()
+                            );
+                            soundManager.playSoundEffect("destruction1.mp3");
+                            engine.addEntity(new Entity().add(effect));
+                            // 削除処理
+                            manager.removeEntity(target);
+                            engine.removeEntity(target);
+                        }
                         manager.removeEntity(bullet);
                         engine.removeEntity(bullet);
-                        engine.removeEntity(target);
                         break;
                     }
                 }

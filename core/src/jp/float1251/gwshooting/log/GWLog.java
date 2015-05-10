@@ -21,4 +21,7 @@ public class GWLog {
         Gdx.app.log("GWShooting", sb.toString());
     }
 
+    public static void log(String message){
+        Gdx.app.log("GWShooting", message);
+    }
 }
